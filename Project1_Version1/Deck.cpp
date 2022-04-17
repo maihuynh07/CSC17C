@@ -7,7 +7,7 @@ Deck::Deck(){
     short key = 0;
     // create 52 cards of poker game
     for(short rank = (short)RANK::ACE;rank!=(short)RANK::KING+1;++rank){
-        for(short suit = (short)SUIT::SPADES;suit!=(short)SUIT::CLUBS+1;++suit){
+        for(short suit = (short)SUIT::CLUBS;suit!=(short)SUIT::SPADES+1;++suit){
             pair<short,short> newCard;
             key++;
             newCard.first = static_cast<short>(rank);
@@ -16,7 +16,7 @@ Deck::Deck(){
         }
     }
     // print all card on deck
-    Helper<deque<card>>::showCards(cards,string("Cards on deck:"));
+    showCards(cards,string("Cards on deck:"));
     //Helper<unordered_map<short,pairs>>::showCards(cards,string("Cards on deck:"));
 }
 

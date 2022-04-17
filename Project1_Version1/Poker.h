@@ -26,6 +26,7 @@ class Poker {
 #endif
     Deck deck;
     short status ;
+    short state;
     
 public:
     void initializeGame(); // initialize a game
@@ -35,6 +36,7 @@ public:
     short getStatus() const{return status;}; // get status of game
     void setStatus(short ss){status = ss;}; // set status of game
     void dealCard();// deal five cards per 1 player
+    void rankHand(); // rank players to score
 private:
 
 };
