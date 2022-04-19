@@ -25,9 +25,12 @@ class Poker {
     list<PokerHand> player;
 #endif
     Deck deck;
-    short status ;
-    short state;
-    
+    short status ; // status of game
+    short state; // state of a game
+    short question; // question to players
+    map<short,string> messages; // messages to display to players through a game
+    map<short,string> questions; // questions to players through a game
+    map<string, short> replies; // answer of players
 public:
     void initializeGame(); // initialize a game
     void getInput(); // ask user for some commands (ex: "Do you want to continue(y/n)?"
@@ -35,7 +38,10 @@ public:
     void render();
     short getStatus() const{return status;}; // get status of game
     void setStatus(short ss){status = ss;}; // set status of game
-    void dealCard();// deal five cards per 1 player
+    short getState() const{return state;}; // get state of game
+    void setState(short st){state = st;}; // set state of game
+    void dealCard(); // deal five cards per 1 player
+    void drawCard(); // exchange some cards on players and deck
     void rankHand(); // rank players to score
 private:
 

@@ -13,9 +13,16 @@ enum class SUIT:short{ CLUBS, DIAMONS, HEARTS, SPADES };// 4 suits of cards in P
 enum class RANK:short{ ACE, TWO , THREE , FOUR, FIVE , SIX , SEVEN, EIGHT , NINE, TEN, JACK, QUEEN, KING}; // value or rank of card from 2-10 and JACK,QUEEN,KING and ACE = one
 enum class DECK_STATUS:short{ FULL, DEALED}; // define status of deck
 enum class GAME_STATUS:short{ START, PLAYING, END}; // define state of a game
-enum class GAME_STATE:short{DEAL,DRAW,SCORE} ; // state of a game
+enum class GAME_STATE:short{ START, DEAL,DRAW,SCORE} ; // state of a game
+enum class QUESTION: short{ START, CHANGECARD, NUMBEROFCARD,DISCARDCARD,REPLAY};// sequence questions will ask players
+enum class MESSAGE: short { WELCOME, WIN, LOOSE, END, INTEGER}; // messages to display to players 
+enum class ANSWER: short {YES,NO}; // answer of players
+static const string YES = "Y"; 
+static const string NO = "N";
 static const short SIZE_DECK = 52; // number of cards of Poker game
 static const short SIZE_HAND = 5; // number of cards of a hand Poker
+static const short FOUR_OF_KIND = 4 ; // number of cards of "four of kind" 
+
 typedef pair<short, short> card;
 
 struct comp {
@@ -84,7 +91,8 @@ static void showCards(const T& cards,string topic){ // print cards
     cout<<"\n";
 }
 static void displayMessage(string message){
-    cout<<"\n "<<message<<" \n";
+    cin.clear();
+    cout<<endl<<message;
 }
 /* @name: compareSuit: comparator function that orders the cards according to the second (suit). 
  *                     if the second is the same, compare the first value (rank)

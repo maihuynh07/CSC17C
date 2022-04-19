@@ -12,8 +12,8 @@ int main(int argc, char** argv) {
         game.getInput();
         game.update();
 #ifdef test1
-        if(game.getStatus()==1) game.setStatus(2);
-#elif test2
+        if(game.getState()==2) game.setStatus(2);
+#else  test2
         game.setStatus(2);
 #endif
         game.render();
