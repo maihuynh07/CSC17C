@@ -17,7 +17,8 @@ private:
     queue<short> discardedPoss; // positions(in cards set) whose card is discarded , values in = {1,2,3,4,5}
     short score;
     short reply;
-    
+    short handRank; // save rank of player, isStraight, isFlush,...
+    short startRank; // save start position of a rank, ex: xxx yy then startRank = 0, xx yyy then startRank = 2
 public:
     PokerHand();
     virtual ~PokerHand();
@@ -42,7 +43,7 @@ public:
     
     bool setDiscardedPoss(short pos);
     short getSize()const;
-    set<card> getCards()const;
+    set<card> getCards()const{return cards;}
     set<card,comp> getRankedCards()const;
     
     /* *************************************************************************
@@ -121,6 +122,23 @@ public:
     
     // set cards for demo
     void setCardsDemo();
+    
+    /* *************************************************************************
+     * @name:setScore(): set score of player in a game
+     * **************************************************************************/
+    void setScore(short s){ score = s;}
+    short getScore() const{ return score;}
+    /* *************************************************************************
+     * @name:setHandRank(): set handRank of player in a game
+     * **************************************************************************/
+    void setHandRank(short r){ handRank = r;}
+    short getHandRank()const{ return handRank;}
+    
+    /* *************************************************************************
+     * @name:setStartRank(): set startRank of player in a game
+     * **************************************************************************/
+    void setStartRank(short r){ startRank = r;}
+    short getStartRank()const{return startRank;}
 };
 
 #endif /* POKERHAND_H */

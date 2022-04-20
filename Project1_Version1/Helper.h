@@ -13,15 +13,21 @@ enum class SUIT:short{ CLUBS, DIAMONS, HEARTS, SPADES };// 4 suits of cards in P
 enum class RANK:short{ ACE, TWO , THREE , FOUR, FIVE , SIX , SEVEN, EIGHT , NINE, TEN, JACK, QUEEN, KING}; // value or rank of card from 2-10 and JACK,QUEEN,KING and ACE = one
 enum class DECK_STATUS:short{ FULL, DEALED}; // define status of deck
 enum class GAME_STATUS:short{ START, PLAYING, END}; // define state of a game
-enum class GAME_STATE:short{ START, DEAL,DRAW,SCORE} ; // state of a game
+enum class GAME_STATE:short{ START, DEAL,DRAW,SCORE,SHOW ,REPLAY} ; // state of a game
 enum class QUESTION: short{ START, CHANGECARD, NUMBEROFCARD,DISCARDCARD,REPLAY};// sequence questions will ask players
-enum class MESSAGE: short { WELCOME, WIN, LOOSE, END, INTEGER}; // messages to display to players 
+enum class MESSAGE: short { WELCOME, WIN, LOOSE, TIE, END, INTEGER}; // messages to display to players 
 enum class ANSWER: short {YES,NO}; // answer of players
+enum class HAND_RANKS: short{HIGHCARD,ONEPAIR,TWOPAIR,THREEOFKIND,STRAIGHT,FLUSH,FULLHOUSE,FOUROFKIND,STRAIGHTFLUSH,ROYALFLUSH}; // descriptions of hand ranks (from lowest to highest)
 static const string YES = "Y"; 
 static const string NO = "N";
 static const short SIZE_DECK = 52; // number of cards of Poker game
 static const short SIZE_HAND = 5; // number of cards of a hand Poker
 static const short FOUR_OF_KIND = 4 ; // number of cards of "four of kind" 
+static const short FULL_SCORE = 100; // highest score in a game.
+static const short THREEOFKIND = 3; // number of cards of three of kind
+static const short TWOPAIR = 2; // number of cards of 2 pair
+static const short ONEPAIR = 2; // number of cards of 1 pair
+
 
 typedef pair<short, short> card;
 
@@ -82,13 +88,15 @@ static string sSuit(const short& suit){
 }
 template <class T>
 static void showCards(const T& cards,string topic){ // print cards
-    cout << "\n********"<<topic<<"***********";
-    cout << "\n\tRANK\tSUIT\n";
+    cout << endl<<"********"<<topic<<"***********";
+    cout << endl;
+    cout << "\tRANK\tSUIT";
+    cout << endl;
     int count = 0;
     for(auto card = cards.begin();card!=cards.end();++card){
-        cout<<++count<<"."<<"\t"<<sRank(card->first)<<"\t"<<sSuit(card->second)<<"\n";
+        cout<<++count<<"."<<"\t"<<sRank(card->first)<<"\t"<<sSuit(card->second)<<endl;
     }
-    cout<<"\n";
+    cout<<endl;
 }
 static void displayMessage(string message){
     cin.clear();

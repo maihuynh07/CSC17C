@@ -43,6 +43,22 @@ public:
     void dealCard(); // deal five cards per 1 player
     void drawCard(); // exchange some cards on players and deck
     void rankHand(); // rank players to score
+    /*  ************************************************************************
+     *  @name: score: manipulate score of players in a game.
+     *  Hands are ranked as follows (from high to low):
+        •	Straight Flush
+        •	Four of a Kind
+        •	Full House
+        •	Flush
+        •	Straight
+        •	Three of a Kind
+        •	Two Pair
+        •	Pair
+        •	High Card
+     * *************************************************************************/
+     
+    void score(); 
+   
 private:
 
 };

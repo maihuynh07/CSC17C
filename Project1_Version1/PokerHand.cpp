@@ -1,15 +1,17 @@
 
 #define demo
 #define test
-//#define demoStraight
+#define demoRoyalFlush
 //#define demoStraightFlush
-//#define demoFlush
 //#define demoFourOfKind
+//#define demoFullHouse
+//#define demoFlush
+//#define demoStraight
 //#define demoThreeOfKind
 //#define demoTwoPair
 //#define demoOnePair
-//#define demoRoyalFlush
-//#define demoFullHouse
+
+
 #include "PokerHand.h"
 #include <iterator>
 
@@ -72,23 +74,26 @@ bool PokerHand::changeCards(queue<card>& ds){
 short PokerHand::getSize()const{
     return cards.size();
 }
-set<card> PokerHand::getCards()const{
-    return cards;
-}
 set<card,comp> PokerHand::getRankedCards()const{
     return rankedCards;
 }
 bool PokerHand::isStraightFlush(){
 
-    if(isStraight() && isFlush())
+    if(isStraight() && isFlush()){
+        handRank = static_cast<short>(HAND_RANKS::STRAIGHTFLUSH);
+        startRank = 0;
         return true;
+    }
     return false;
 }
 bool PokerHand::isRoyalFlush(){
 
     auto it = prev(cards.end());
-    if(isStraight() && isFlush() && it->first==(short)RANK::KING) 
+    if(isStraight() && isFlush() && it->first==(short)RANK::KING) {
+        handRank = static_cast<short>(HAND_RANKS::ROYALFLUSH);
+        startRank = 0;
         return true;
+    }
     return false;
 }
 bool PokerHand::isFourOfKind(){
@@ -106,8 +111,11 @@ bool PokerHand::isFourOfKind(){
     
     if(countStart == FOUR_OF_KIND // type: xxxx y
             || countEnd == FOUR_OF_KIND // type: x yyyy
-        ) 
+        ) {
+        handRank = static_cast<short>(HAND_RANKS::FOUROFKIND);
+        countStart == FOUR_OF_KIND? startRank = 0: startRank =1;
         return true;
+    }
     return false;
 }
 bool PokerHand::isFullHouse(){
@@ -120,10 +128,14 @@ bool PokerHand::isFullHouse(){
     
     //check for type: xxx yy
     if (itBegin->first == it1->first && it1->first == it2->first && it3->first == it4->first)
+        handRank = static_cast<short>(HAND_RANKS::FULLHOUSE);
+        startRank = 0;
         return true;
     
     //check for type: xx yyy
     if (itBegin->first == it1->first  && it2->first == it3->first && it3->first == it4->first)
+        handRank = static_cast<short>(HAND_RANKS::FULLHOUSE);
+        startRank = 2;
         return true;
     
     return false;
@@ -136,7 +148,11 @@ bool PokerHand::isFlush(){
     auto position1= rankedCards.begin();
     auto position5= prev(rankedCards.end());
     if(position1->second == position5->second) // check suit of first card is equal to suit of last card
+    {
+        handRank = static_cast<short>(HAND_RANKS::FLUSH);
+        startRank = 0;
         return true;
+    }
     return false;
 }
 bool PokerHand::isStraight(){
@@ -178,6 +194,8 @@ bool PokerHand::isStraight(){
         pos = nextPos;
         nextPos = next(pos);
     }
+    handRank = static_cast<short>(HAND_RANKS::STRAIGHT);
+    startRank = 0;
     return true;
 }
 bool PokerHand::isThreeOfKind(){
@@ -191,12 +209,18 @@ bool PokerHand::isThreeOfKind(){
         , it3=next(itBegin,3)
         , it4=next(itBegin,4);
     if(itBegin->first == it1->first && it1->first==it2->first ){ // check for xxx y z
+        handRank = static_cast<short>(HAND_RANKS::THREEOFKIND);
+        startRank = 0;
         return true;
     }
     if(it1->first == it2->first && it2->first==it3->first ){ // check for x yyy z
+        handRank = static_cast<short>(HAND_RANKS::THREEOFKIND);
+        startRank = 1;
         return true;
     }
     if(it2->first == it3->first && it3->first==it4->first ){ // check for x y zzz
+        handRank = static_cast<short>(HAND_RANKS::THREEOFKIND);
+        startRank = 2;
         return true;
     }
     return false;
@@ -213,12 +237,18 @@ bool PokerHand::isTwoPair(){
         , it4=next(itBegin,4);
     
     if(itBegin->first == it1->first && it2->first==it3->first ){ // check for xx yy z
+        handRank = static_cast<short>(HAND_RANKS::TWOPAIR);
+        startRank = 0;
         return true;
     }
     if(it1->first == it2->first && it3->first==it4->first ){ // check for x yy zz
+        handRank = static_cast<short>(HAND_RANKS::TWOPAIR);
+        startRank = 1;
         return true;
     }
     if(itBegin->first == it1->first && it3->first==it4->first ){ // check for xx y zz
+        handRank = static_cast<short>(HAND_RANKS::TWOPAIR);
+        startRank = 3;
         return true;
     }
     return false;
@@ -238,6 +268,15 @@ bool PokerHand::isPair(){
             || it2->first == it3->first  // x y zz t
             || it3->first == it4->first  // x y z tt
             ){ 
+        handRank = static_cast<short>(HAND_RANKS::TWOPAIR);
+        if(itBegin->first == it1->first)  
+           startRank = 0;
+        if(itBegin->first == it1->first)  
+           startRank = 1;
+        if(itBegin->first == it1->first)  
+           startRank = 2;
+        if(itBegin->first == it1->first)  
+           startRank = 3;
         return true;
     }
     return false;
@@ -398,4 +437,5 @@ void PokerHand::setCardsDemo(){
     tmp.clear();
 #endif   
 }
+
 

@@ -6,6 +6,7 @@
 #include <cstdlib> //srand()
 #include <sstream>
 #include <stack> // using stringstream to convert string to int
+#include <map>
 void Poker::initializeGame(){
     
     // initialize status of game
@@ -24,6 +25,7 @@ void Poker::initializeGame(){
     messages.insert({static_cast<short>(MESSAGE::WELCOME),"Welcome you to FIVE DRAW POKER game"});
     messages.insert({static_cast<short>(MESSAGE::WIN),"You win"});
     messages.insert({static_cast<short>(MESSAGE::LOOSE),"You loose"});
+    messages.insert({static_cast<short>(MESSAGE::LOOSE),"You tie"});
     messages.insert({static_cast<short>(MESSAGE::END),"Good bye"});
     messages.insert({static_cast<short>(MESSAGE::INTEGER),"Please enter an positive integer from 1-5"});
     
@@ -34,49 +36,52 @@ void Poker::initializeGame(){
 }
 void Poker::getInput(){
 #ifdef oneplayer
-    if(status==static_cast<short>(GAME_STATE::START)){
-        short rep;
+    if(state==static_cast<short>(GAME_STATE::START)){
+        string rep;
+        
         // display message to players :"Do you want to play a new game (y/n)?";
         displayMessage(questions[question]); 
-        cin>>rep;
-        cin.ignore();
-        // set answer of players
-        player.setReply(rep);
+        getline(cin,rep);
+        // save answer of players
+        transform(rep.begin(), rep.end(), rep.begin(), ::toupper);
+        player.setReply(replies[rep]);
         
         // set question to next question
         ++question; 
         return;
     }
-    if(status==static_cast<short>(GAME_STATE::DEAL)){
+    if(state==static_cast<short>(GAME_STATE::DEAL)){
         
         int numberOfCard = 0; // number of card which player will discard;
-        while(state != static_cast<short>(GAME_STATE::DRAW)){
+        while(state == static_cast<short>(GAME_STATE::DEAL)){
             string rep;
             displayMessage(questions[question]);
+            
             // if ask player "Do you want to change any card (y/n):"
             if(question == static_cast<short>(QUESTION::CHANGECARD)){
-                cin.clear();
                 getline(cin,rep);
-                cin.ignore();
                 // save answer of players
+                transform(rep.begin(), rep.end(), rep.begin(), ::toupper);
                 player.setReply(replies[rep]);
                 
                 // if player choose  not draw
                 if(replies[rep] == static_cast<short>(ANSWER::NO) ){
                     
                     // go to next state
-                    state == static_cast<short>(GAME_STATE::DRAW);
+                    state = static_cast<short>(GAME_STATE::DRAW);
+                    question +=3;
                     break;
                 }
             }
+            
             // if player type number of card will be discarded
             if(question == static_cast<short>(QUESTION::NUMBEROFCARD)){
                 // using stringstream to convert rep(string) to numberOfCard(int)
-                cin.ignore();
                 getline(cin,rep);
                 stringstream number(rep);
                 number >> numberOfCard; 
             }
+            
             // if player type position of cards will be discarded
             if(question == static_cast<short>(QUESTION::DISCARDCARD)){
                 int number, count = 1;
@@ -89,15 +94,21 @@ void Poker::getInput(){
                         count = 1;
                     }
                     else{
+                        
                         // save to discardedPos
                         player.setDiscardedPoss(number);
                         
                         // save cards are drawn into deck.disCardCards
                         deck.disCardedCards.push(deck.cards.back());
+                        
+                        // remove cards are drawn from deck
                         deck.cards.pop_back();
                         count++;
                     }
                 }
+                
+                cin.ignore();
+                cin.clear();
                 
                 // go to next state
                 state = static_cast<short>(GAME_STATE::DRAW);
@@ -108,6 +119,25 @@ void Poker::getInput(){
         }
         return;
     }
+    if(state == static_cast<short>(GAME_STATE::REPLAY)){
+        string rep;
+        displayMessage(questions[question]); 
+        getline(cin,rep);
+        // save answer of players
+        transform(rep.begin(), rep.end(), rep.begin(), ::toupper);
+        player.setReply(replies[rep]);
+        
+        if(player.getReply() == static_cast<short>(ANSWER::YES)){
+            status = static_cast<short>(GAME_STATUS::START);
+            question = static_cast<short>(QUESTION::START);
+            state = static_cast<short>(GAME_STATE::START);
+        }
+        else{
+            status = static_cast<short>(GAME_STATUS::END);
+        }
+        // set question to next question
+        ++question; 
+    }
 #endif
     
 }
@@ -116,7 +146,9 @@ void Poker::update(){
     
     if(state == static_cast<short>(GAME_STATE::START)){
         if(player.getReply() ==  static_cast<short>(ANSWER::YES)){
-            // save state of game
+            
+            
+            // set state of game
             state = static_cast<short>(GAME_STATE::DEAL);
             status = static_cast<short>(GAME_STATUS::PLAYING);
             
@@ -126,18 +158,32 @@ void Poker::update(){
     }
     if(state == static_cast<short>(GAME_STATE::DRAW)){
         drawCard();
+        rankHand();
+        state = static_cast<short>(GAME_STATE::SCORE);
+    }
+    if(state == static_cast<short>(GAME_STATE::SCORE)){
+        score();
+        state = static_cast<short>(GAME_STATE::SHOW);
+        return;
+    }
+    if(state == static_cast<short>(GAME_STATE::SHOW)){
+        state = static_cast<short>(GAME_STATE::REPLAY);
+        return;
     }
     
 #endif
 }
 
 void Poker::dealCard(){
+    
     //step1: shuffle 52 cards on deck
     srand(unsigned(time(0)));// Use a different seed value so that we don't get same result each time we run this program
     random_shuffle(deck.cards.begin(), deck.cards.end());// using built-in random generator
+
 #ifdef demo    //display cards on deck only demo mode
     showCards<deque<card>>(deck.cards,"Cards on deck after shuffle"); // print all cards on deck
 #endif   
+    
     //step2: deal 5 cards per 1 player , sequence from top of deck 
 #ifdef oneplayer
     deque<card>::iterator itDeckCards = deck.cards.begin();
@@ -152,15 +198,6 @@ void Poker::dealCard(){
             player.addCards(keyPlayer++,deck.cards.back());
         }
         deck.cards.pop_back();
-    }
-
-#else
-    list<PokerHand>::iterator itPlayer = player.begin();
-    multimap<short,pairs>::iterator itDeckCards = deck.cards.begin();
-    for(;iterator!=player.end();++iterator){
-        for(;itDeckCards!=deck.cards.end();++itDeckCards){
-            
-        }
     }
 #endif    
     
@@ -182,8 +219,8 @@ void Poker::rankHand(){
     if(player.isThreeOfKind()) displayMessage("Players has a isThreeOfKind");
     if(player.isTwoPair()) displayMessage("Players has a isTwoPair");
     if(player.isPair()) displayMessage("Players has a isPair");
-    showCards(player.getCards(),string("Cards after sort by suit:"));
-    showCards(player.getRankedCards(),"\nRanked Cards: \n");
+    
+    showCards(player.getRankedCards(),"Ranked Cards: ");
 #endif
 }
 void Poker::drawCard(){
@@ -192,8 +229,398 @@ void Poker::drawCard(){
 
 void Poker::render(){
 #ifdef demo
-    //showCards(dealer.getCards(),string("Cards on poker hand (dealer):"));
+    showCards(dealer.getCards(),string("Cards on poker hand (dealer):"));
     showCards(player.getCards(),string("Cards on poker hand (player):"));
 #endif
+    if(state == static_cast<short>(GAME_STATE::SHOW)){
+        if(dealer.getScore() < player.getScore()){
+            displayMessage("You "+messages[static_cast<short>(MESSAGE::WIN)]);
+        }
+        else if(dealer.getScore()> player.getScore()){
+            displayMessage("You "+messages[static_cast<short>(MESSAGE::LOOSE)]);
+        }
+        else
+            displayMessage("You "+messages[static_cast<short>(MESSAGE::TIE)]); 
+        
+    }
+    if(status == static_cast<short>(GAME_STATUS::END)){
+        displayMessage(messages[static_cast<short>(MESSAGE::END)]);
+        exit(0);
+    }
+}
+void Poker::score(){
+    set<card> cp = player.getCards();
+    set<card> cd = dealer.getCards();
+    
+    if(player.getHandRank() == dealer.getHandRank()){
+        
+        //ROYALFLUSH,STRAIGHTFLUSH,FOUROFKIND,FULLHOUSE,FLUSH,STRAIGHT,THREEOFKIND,TWOPAIR,PAIR,HIGHCARD
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::ROYALFLUSH)){
+            player.setScore(FULL_SCORE/2);
+            dealer.setScore(FULL_SCORE/2);
+            return;
+        }
+        
+        // type:  2J 3J 4J 5J 6J,...
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::STRAIGHTFLUSH)){
+            auto itd = cd.end();
+            auto itp = cp.end();
+            if (itd->first == itp->first){
+                player.setScore(FULL_SCORE/2);
+                dealer.setScore(FULL_SCORE/2);
+            }
+            else if(itd->first > itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else{
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+            return;
+        }
+        
+        // type: xxxx y , x yyyy
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::FOUROFKIND)){
+            
+            
+            short posHighCardP = player.getStartRank();
+            short posHighCardD = dealer.getStartRank();
+            
+            // get pos of four of kind
+            auto itd = next(cd.begin(),dealer.getStartRank());
+            auto itp = next(cp.begin(),player.getStartRank());
+            
+            // step 1: compare four of kind on first element 
+            if(itd->first > itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else if(itd->first < itp->first){
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+            
+            // step 2: if four of kind tie, compare high card
+            else {
+                
+                // remove four of kind from set of cards to get high card
+                cd.erase(itd,next(itd,TWOPAIR));
+                cp.erase(itp,next(itp,TWOPAIR)); 
+                
+                itd = cd.begin();
+                itp = cp.begin();
+                
+                if(itd->first > itp->first){
+                    dealer.setScore(FULL_SCORE);
+                    player.setScore(0);
+                }
+                else if(itd->first < itp->first){
+                    dealer.setScore(0);
+                    player.setScore(FULL_SCORE);
+                }
+                else{
+                    player.setScore(FULL_SCORE/2);
+                    dealer.setScore(FULL_SCORE/2);
+                }
+                    
+            }
+            return;
+        }
+        
+        // type: xxx yy, xx yyy
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::FULLHOUSE)){
+            
+            
+            short posHighCardP = player.getStartRank();
+            short posHighCardD = dealer.getStartRank();
+            
+            // get pos of three of kind
+            auto itd = next(cd.begin(),dealer.getStartRank());
+            auto itp = next(cp.begin(),player.getStartRank());
+            
+            // step 1: at first, compare three of kind
+            if(itd->first > itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else if(itd->first < itp->first){
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+            
+            // step 2: compare remained one pair
+            else{
+                
+                // remove three of kind from set of cards to get remained pair
+                cd.erase(itd,next(itd,THREEOFKIND));
+                cp.erase(itp,next(itp,THREEOFKIND));
+                
+                itd = cd.begin();
+                itp = cp.begin();
+                
+                if(itd->first > itp->first){
+                    dealer.setScore(FULL_SCORE);
+                    player.setScore(0);
+                }
+                else if(itd->first < itp->first){
+                    dealer.setScore(0);
+                    player.setScore(FULL_SCORE);
+                }
+                else{
+                    dealer.setScore(FULL_SCORE/2);
+                    player.setScore(FULL_SCORE/2);
+                }
+            }
+            return;
+        }
+        
+        // type: 2D 9D 3D 6D 5D
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::FLUSH)){
+            
+            auto itp = cp.rbegin();
+            auto itd = cd.rbegin();
+            for(;itp != cp.rend(),itd != cd.rend(); ++itp,++itd){
+                if((*itd).first == (*itp).first) continue;
+                if((*itd).first > (*itp).first){
+                    dealer.setScore(FULL_SCORE);
+                    player.setScore(0);
+                    break;
+                }
+                else {
+                    dealer.setScore(0);
+                    player.setScore(FULL_SCORE);
+                    break;
+                }
+            }
+            if(itp == cp.rend()){
+                dealer.setScore(FULL_SCORE/2);
+                player.setScore(FULL_SCORE/2);
+            }
+        }
+            
+        // type: 6D 7S 8J 9D 10H
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::STRAIGHT)){
+            
+            auto itd = prev(cd.end());
+            auto itp = prev(cp.end());
+            if(itd->first == itp->first){
+                dealer.setScore(FULL_SCORE/2);
+                player.setScore(FULL_SCORE/2);
+            }
+            else if (itd->first == itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else{
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+            return;
+        }
+        
+        // type: xxx y z,  x yyy z, x y zzz
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::THREEOFKIND)){
+            
+            
+            short posHighCardP = player.getStartRank();
+            short posHighCardD = dealer.getStartRank();
+            
+            // get pos of three of kind
+            auto itd = next(cd.begin(),posHighCardD);
+            auto itp = next(cp.begin(),posHighCardP);
+            
+            // step 1: compare "three of kind" on first element 
+            if(itd->first > itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else if(itd->first < itp->first){
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+            
+            // step 2: if threeofkind tie, sequently compare high cards
+            else{
+                
+                // remove threeofkind from set of cards to get list of high card
+                cd.erase(itd,next(itd,THREEOFKIND));
+                cp.erase(itp,next(itp,THREEOFKIND));
+                set<card>::reverse_iterator itd1= cd.rbegin();
+                set<card>::reverse_iterator itp1 = cp.rbegin();
+                for(;itd1!=cd.rend() && itp1!=cp.rend();++itd1,++itp1){
+                        if(itd1->first > itp1->first){
+                            dealer.setScore(FULL_SCORE);
+                            player.setScore(0);
+                        }
+                        else if(itd1->first < itp1->first){
+                            dealer.setScore(0);
+                            player.setScore(FULL_SCORE);
+                        }
+                        else{
+                            dealer.setScore(FULL_SCORE/2);
+                            player.setScore(FULL_SCORE/2);
+                        }
+                }
+                    
+            }
+            return;
+        }
+
+        // type: xx yy z,  x yy zz, xx y zz 
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::TWOPAIR)){
+            
+            auto itd = cd.begin();
+            auto itp = cp.begin();
+            
+            short posHighCardD  = dealer.getStartRank();
+            short posHighCardP = player.getStartRank();
+            
+            itd = next(cd.begin(),posHighCardD);
+            itp = next(cp.begin(),posHighCardP);
+            
+            // find pos of max(two pair)
+            if( posHighCardD + ONEPAIR < SIZE_HAND) itd= next(itd,ONEPAIR);
+            if( posHighCardP + ONEPAIR < SIZE_HAND) itp= next(itp,ONEPAIR);
+            
+            // step 1: compare max(two pair)
+            if(itd->first > itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else if(itd->first < itp->first){
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+            
+            // step 2: if max(two pair) tie, compare remained pair
+            else{
+                // find pos of remained pair
+                itd = posHighCardD + ONEPAIR < SIZE_HAND? prev(itd,ONEPAIR):cd.begin();
+                itp = posHighCardP + ONEPAIR < SIZE_HAND? prev(itp,ONEPAIR):cp.begin();
+                
+                // compare remained pair
+                if(itd->first > itp->first){
+                    dealer.setScore(FULL_SCORE);
+                    player.setScore(0);
+                }
+                else if(itd->first < itp->first){
+                    dealer.setScore(0);
+                    player.setScore(FULL_SCORE);
+                }
+
+                // step 3: if remained pair tie, compare high card
+                else{
+                    // find pos of high card
+                    itd = next(cd.begin(),(posHighCardD+TWOPAIR)% SIZE_HAND);
+                    itp = next(cp.begin(),(posHighCardP+TWOPAIR)% SIZE_HAND);
+                    
+                    // compare high card
+                    if(itd->first > itp->first){
+                        dealer.setScore(FULL_SCORE);
+                        player.setScore(0);
+                    }
+                    else if(itd->first < itp->first){
+                        dealer.setScore(0);
+                        player.setScore(FULL_SCORE);
+                    }
+                    else
+                    {
+                        dealer.setScore(FULL_SCORE/2);
+                        player.setScore(FULL_SCORE/2);
+                    }
+                }
+                
+            }
+            
+            return;
+        }
+        
+        // type: xx y z t, x yy z t, x y zz t, x y z tt
+        if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::ONEPAIR)){
+            
+            auto itd = cd.begin();
+            auto itp = cp.begin();
+            
+            short posHighCardD  = dealer.getStartRank();
+            short posHighCardP = player.getStartRank();
+            
+            // find pos of pair
+            itd = next(cd.begin(),posHighCardD);
+            itp = next(cp.begin(),posHighCardP);
+            
+            
+            // step 1: compare pair
+            if(itd->first > itp->first){
+                dealer.setScore(FULL_SCORE);
+                player.setScore(0);
+            }
+            else if(itd->first < itp->first){
+                dealer.setScore(0);
+                player.setScore(FULL_SCORE);
+            }
+
+            // step 2: if pair tie, compare sequence high card, start from highest card
+            else
+            {
+                // remove pair from set of cards to get list of high card
+                cd.erase(itd,next(itd,ONEPAIR));
+                cp.erase(itp,next(itp,ONEPAIR));                
+                set<card>::reverse_iterator itd1= cd.rbegin();
+                set<card>::reverse_iterator itp1 = cp.rbegin();
+                for( ;itd1!=cd.rend() && itp1!=cp.rend();++itd1,++itp1){
+                        if(itd1->first > itp1->first){
+                            dealer.setScore(FULL_SCORE);
+                            player.setScore(0);
+                        }
+                        else if(itd1->first < itp1->first){
+                            dealer.setScore(0);
+                            player.setScore(FULL_SCORE);
+                        }
+                        else{
+                            dealer.setScore(FULL_SCORE/2);
+                            player.setScore(FULL_SCORE/2);
+                        }
+                }
+            }
+            return;
+        }
+        
+        // high card
+        else{
+            
+            // compare sequently cards in set , start from highest card
+            set<card>::reverse_iterator itd1= cd.rbegin();
+            set<card>::reverse_iterator itp1 = cp.rbegin();
+            for( ;itd1!=cd.rend() && itp1!=cp.rend();++itd1,++itp1){
+                    if(itd1->first > itp1->first){
+                        dealer.setScore(FULL_SCORE);
+                        player.setScore(0);
+                    }
+                    else if(itd1->first < itp1->first){
+                        dealer.setScore(0);
+                        player.setScore(FULL_SCORE);
+                    }
+                    else{
+                        dealer.setScore(FULL_SCORE/2);
+                        player.setScore(FULL_SCORE/2);
+                    }
+            }
+        }
+        
+        
+        
+    }
+    else if(player.getHandRank()>dealer.getHandRank()){
+        player.setScore(FULL_SCORE);
+        dealer.setScore(0);
+    }
+    else{
+        player.setScore(0);
+        dealer.setScore(FULL_SCORE);
+    }
+    
+    cp.clear();
+    cd.clear();
 }
 
