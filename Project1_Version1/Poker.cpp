@@ -208,23 +208,23 @@ void Poker::rankHand(){
 #ifdef demo
     player.setCardsDemo();
 #endif
-    player.sortBySuit();
-
-    if(player.isFlush()) displayMessage("Players has a flush");
-    if(player.isStraight()) displayMessage("Players has a straight");
-    if(player.isStraightFlush()) displayMessage("Players has a isStraightFlush");
-    if(player.isRoyalFlush()) displayMessage("Players has a isRoyalFlush");
-    if(player.isFourOfKind()) displayMessage("Players has a isFourOfKind");
-    if(player.isFullHouse()) displayMessage("Players has a isFullHouse");
-    if(player.isThreeOfKind()) displayMessage("Players has a isThreeOfKind");
-    if(player.isTwoPair()) displayMessage("Players has a isTwoPair");
-    if(player.isPair()) displayMessage("Players has a isPair");
+        
+    player.rank();
+    dealer.rank();
     
-    showCards(player.getRankedCards(),"Ranked Cards: ");
+    showCards(player.getRankedCards(),"Player Ranked Cards: ");
+    showCards(dealer.getRankedCards(),"Dealer Ranked Cards: ");
 #endif
 }
 void Poker::drawCard(){
-    player.changeCards(deck.disCardedCards);
+    
+    if(!deck.disCardedCards.empty()) 
+    {
+        player.changeCards(deck.disCardedCards);
+        player.sortBySuit();
+    }
+    AIComputer();
+    
 }
 
 void Poker::render(){
@@ -622,5 +622,56 @@ void Poker::score(){
     
     cp.clear();
     cd.clear();
+}
+void Poker::AIComputer(){
+
+    dealer.rank();
+    
+    set<card> cd = dealer.getCards();
+    bool flag = false; // flag = true if has drawing card
+    
+    if(dealer.getSizeHighCard()==0)  return;
+    
+    //if isFourOfKind() isThreeOfKind() isTwoPair() isPair() isHighCard())
+    int count = 0; 
+
+    // step 1: find pos of first high card
+    short startRank = dealer.getStartRank();
+    short sizeHighCard = dealer.getSizeHighCard();
+    short posHighCard = (startRank+(SIZE_HAND-sizeHighCard))%SIZE_HAND;
+    auto ithc = next(cd.begin(),posHighCard);
+
+    // step 2: test which high cards need to decide drawing or not
+    while(count< sizeHighCard){
+
+        // if high card too low, process drawing card.
+        if(ithc->first < LOWCARD){
+
+            // step 2: save to discardedPos
+            dealer.setDiscardedPoss(posHighCard+1);   
+
+            // step 3: save cards are drawn into deck.disCardCards
+            deck.disCardedCards.push(deck.cards.back());
+
+            // step 4: remove cards are drawn from deck
+            deck.cards.pop_back();
+
+            // set flag
+            flag = true;
+        }
+
+        posHighCard++;
+        count++;
+        ithc = next(cd.begin(),posHighCard%SIZE_HAND);
+    }
+
+    if(flag){
+
+        // step 5: change card
+        dealer.changeCards(deck.disCardedCards);
+
+        // arrange cards on suit
+        dealer.sortBySuit();
+    }
 }
 

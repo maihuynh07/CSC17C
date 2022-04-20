@@ -22,12 +22,12 @@ static const string YES = "Y";
 static const string NO = "N";
 static const short SIZE_DECK = 52; // number of cards of Poker game
 static const short SIZE_HAND = 5; // number of cards of a hand Poker
-static const short FOUR_OF_KIND = 4 ; // number of cards of "four of kind" 
-static const short FULL_SCORE = 100; // highest score in a game.
+static const short FOUROFKIND = 4 ; // number of cards of "four of kind" 
 static const short THREEOFKIND = 3; // number of cards of three of kind
 static const short TWOPAIR = 2; // number of cards of 2 pair
 static const short ONEPAIR = 2; // number of cards of 1 pair
-
+static const short LOWCARD = 5; // define rank of high card, to decide drawing card or not
+static const short FULL_SCORE = 100; // highest score in a game.
 
 typedef pair<short, short> card;
 

@@ -19,6 +19,7 @@ private:
     short reply;
     short handRank; // save rank of player, isStraight, isFlush,...
     short startRank; // save start position of a rank, ex: xxx yy then startRank = 0, xx yyy then startRank = 2
+    short sizeHighCard; // number of high card in cards
 public:
     PokerHand();
     virtual ~PokerHand();
@@ -40,11 +41,10 @@ public:
     */
     bool changeCards(queue<card>&);
     
-    
     bool setDiscardedPoss(short pos);
     short getSize()const;
     set<card> getCards()const{return cards;}
-    set<card,comp> getRankedCards()const;
+    set<card,comp> getRankedCards()const; 
     
     /* *************************************************************************
      * @name: isStraightFlush(): check if cards are increasing continuously in rank and the same suit
@@ -115,10 +115,14 @@ public:
      *          false otherwise
      * **************************************************************************/
     bool isPair();
+    
     /* *************************************************************************
      * @name:sortBySuit(): sort cards by suit on ASC order. If same suit, sort rank on ASC order
      * **************************************************************************/
     bool sortBySuit();
+    
+    
+    void rank();
     
     // set cards for demo
     void setCardsDemo();
@@ -128,6 +132,7 @@ public:
      * **************************************************************************/
     void setScore(short s){ score = s;}
     short getScore() const{ return score;}
+    
     /* *************************************************************************
      * @name:setHandRank(): set handRank of player in a game
      * **************************************************************************/
@@ -139,6 +144,12 @@ public:
      * **************************************************************************/
     void setStartRank(short r){ startRank = r;}
     short getStartRank()const{return startRank;}
+    
+    /* *************************************************************************
+     * @name:setSizeHighCard(): set sizeHighCard of player in a game
+     * **************************************************************************/
+    void setSizeHighCard(short r){ sizeHighCard = r;}
+    short getSizeHighCard()const{return sizeHighCard;}
 };
 
 #endif /* POKERHAND_H */
