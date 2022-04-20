@@ -34,15 +34,24 @@ public:
      * **************************************************************************/
     bool addCards(short,card); 
     
-    /* @name: changeCards: add cards from deck into discardedCards and remove cards from cards at positions in discardedPoss.
-     * @parameter: newCards (rank,suit)
+    /* *************************************************************************
+     * @name: changeCards: add cards from deck.discardedCards and remove cards from cards at positions in discardedPoss.
+     * @parameter: queue<card>& : deck.discardedCards
        @return: true if successful
               , otherwise false
-    */
+     **************************************************************************/
     bool changeCards(queue<card>&);
     
+    /* *************************************************************************
+     * @name: setDiscardedPoss: save position of card will be discard into discardedPoss.
+     * @parameter: queue<card>& : deck.discardedCards
+       @return: true if successful
+              , otherwise false
+     **************************************************************************/
     bool setDiscardedPoss(short pos);
+    
     short getSize()const;
+    
     set<card> getCards()const{return cards;}
     set<card,comp> getRankedCards()const; 
     
@@ -121,33 +130,20 @@ public:
      * **************************************************************************/
     bool sortBySuit();
     
-    
-    void rank();
-    
-    // set cards for demo
-    void setCardsDemo();
-    
     /* *************************************************************************
-     * @name:setScore(): set score of player in a game
+     * @name:rank(): check poker hand has which hand rank
      * **************************************************************************/
+    bool rank();
+
     void setScore(short s){ score = s;}
     short getScore() const{ return score;}
-    
-    /* *************************************************************************
-     * @name:setHandRank(): set handRank of player in a game
-     * **************************************************************************/
+
     void setHandRank(short r){ handRank = r;}
     short getHandRank()const{ return handRank;}
     
-    /* *************************************************************************
-     * @name:setStartRank(): set startRank of player in a game
-     * **************************************************************************/
     void setStartRank(short r){ startRank = r;}
     short getStartRank()const{return startRank;}
     
-    /* *************************************************************************
-     * @name:setSizeHighCard(): set sizeHighCard of player in a game
-     * **************************************************************************/
     void setSizeHighCard(short r){ sizeHighCard = r;}
     short getSizeHighCard()const{return sizeHighCard;}
 };

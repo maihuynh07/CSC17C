@@ -1,16 +1,6 @@
 
 #define demo
 #define test
-#define demoRoyalFlush
-//#define demoStraightFlush
-//#define demoFourOfKind
-//#define demoFullHouse
-//#define demoFlush
-//#define demoStraight
-//#define demoThreeOfKind
-//#define demoTwoPair
-//#define demoOnePair
-
 
 #include "PokerHand.h"
 #include <iterator>
@@ -47,28 +37,16 @@ bool PokerHand::changeCards(queue<card>& ds){
         // save discarded card into discardedCards
         discardedCards.insert(c);
         
-#ifdef test
-        showCards(cards,"Cards before erase: ("+ sRank(it->first)+")");
-#endif
         // remove card at pos in cards
         cards.erase(it);
         count ++;
-#ifdef test
-        showCards(cards,"Cards after erase: ("+ sRank(it->first)+")");
-#endif
     }
     
     // add ds to set of cards
     while(!ds.empty()){
-        cards.insert(ds.front());
-#ifdef test
-        displayMessage("ds: "+sRank(ds.front().first)+","+sSuit(ds.front().second));
-#endif        
+        cards.insert(ds.front());     
         ds.pop();
     }
-#ifdef test
-        showCards(cards,"Cards after erase: ");
-#endif    
     return true;
 }
 short PokerHand::getSize()const{
@@ -147,8 +125,6 @@ bool PokerHand::isFullHouse(){
 
 bool PokerHand::isFlush(){
         
-    if(cards.size()!=SIZE_HAND) return false; // check hand has enough 5 cards.
-    if(rankedCards.size()!=SIZE_HAND) return false; // check rankedCards has enough 5 cards.
     auto position1= rankedCards.begin();
     auto position5= prev(rankedCards.end());
     if(position1->second == position5->second) // check suit of first card is equal to suit of last card
@@ -161,7 +137,7 @@ bool PokerHand::isFlush(){
     return false;
 }
 bool PokerHand::isStraight(){
-
+    
     /* 
      * check for special case: has an ACE
      * if has an ACE, check if has (ACE 2 3 4 5) or (10 JACK QUEEN KING ACE)
@@ -195,6 +171,7 @@ bool PokerHand::isStraight(){
         }
         return false;
     }
+    
     /* 
      * check for normal case: no ACE, increasing continuously in rank
      */
@@ -215,7 +192,7 @@ bool PokerHand::isStraight(){
 }
 bool PokerHand::isThreeOfKind(){
     
-    if(isFourOfKind() || isFullHouse()) // if fourofkind or fullhouse
+    if(isFourOfKind() || isFullHouse()) 
         return false; 
     
     auto itBegin = cards.begin();
@@ -243,7 +220,7 @@ bool PokerHand::isThreeOfKind(){
 }
 bool PokerHand::isTwoPair(){
     
-    if(isFourOfKind() || isFullHouse() || isThreeOfKind()) // if fourofkind or fullhouse or threeofkind
+    if(isFourOfKind() || isFullHouse() || isThreeOfKind()) 
         return false;
     
     auto itBegin = cards.begin();
@@ -308,225 +285,54 @@ bool PokerHand::sortBySuit(){
     tmp.clear();
     return true;
 }
-void PokerHand::rank(){
+bool PokerHand::rank(){
     
     sortBySuit();
+    
+    if(cards.size()!=SIZE_HAND) return false; // check hand has enough 5 cards.
+    if(rankedCards.size()!=SIZE_HAND) return false; // check rankedCards has enough 5 cards.
+    
     if(isRoyalFlush()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isStraightFlush()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isFourOfKind()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isFullHouse()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isFlush()){ 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isStraight()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isThreeOfKind()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isTwoPair()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
     if(isPair()) { 
-#ifdef test
-        displayMessage("Players has a isRoyalFlush");
-#endif
-        return; 
+        return true; 
     }
     
+    // lowest hand rank
     startRank = 0;
     sizeHighCard = SIZE_HAND;
     handRank = static_cast<short>(HAND_RANKS::HIGHCARD);
-}
-void PokerHand::setCardsDemo(){
-#ifdef demoStraightFlush
-    set<card> tmp;
-    card c ; c.first = (short)RANK::ACE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::THREE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-     c.first = (short)RANK::FOUR; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-     c.first = (short)RANK::FIVE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif
-    #ifdef demoRoyalFlush
-    set<card> tmp;
-    card c ; 
-    c.first = (short)RANK::ACE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::QUEEN; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::TEN; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::KING; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::JACK; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif    
-#ifdef demoFourOfKind
-    set<card> tmp;
-    card c ; 
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::KING; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::SPADES;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::HEARTS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif    
-#ifdef demoFullHouse
-    set<card> tmp;
-    card c ; 
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::HEARTS;
-    tmp.insert(c);
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::SPADES;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    showCards<set<card>>(cards,"Cards before swap: "); 
-    showCards<set<card>>(tmp,"tmp before swap: "); 
-    tmp.swap(cards);   
-    showCards<set<card>>(cards,"Cards after swap: "); 
-    showCards<set<card>>(tmp,"tmp after swap: "); 
-    tmp.clear();
-#endif       
-#ifdef demoFlush
-    set<card> tmp;
-    card c ;
-    c.first = (short)RANK::JACK; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::QUEEN; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::THREE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::TEN; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::FIVE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif 
-#ifdef demoStraight
-    set<card> tmp1;
-    card c1 ;
-    c1.first = (short)RANK::TWO; c1.second = (short)SUIT::SPADES;
-    tmp1.insert(c1);
-    c1.first = (short)RANK::FOUR; c1.second = (short)SUIT::DIAMONS;
-    tmp1.insert(c1);
-    c1.first = (short)RANK::FIVE; c1.second = (short)SUIT::SPADES;
-    tmp1.insert(c1);
-    c1.first = (short)RANK::THREE; c1.second = (short)SUIT::CLUBS;
-    tmp1.insert(c1);
-    c1.first = (short)RANK::SIX; c1.second = (short)SUIT::DIAMONS;
-    tmp1.insert(c1);
-    tmp1.swap(cards);     
-    tmp1.clear();
-    
-#endif    
-#ifdef demoThreeOfKind
-    set<card> tmp;
-    card c ; 
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::KING; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::HEARTS;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::SPADES;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif    
-#ifdef demoTwoPair
-    set<card> tmp;
-    card c ; 
-    c.first = (short)RANK::KING; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::KING; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::HEARTS;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::SPADES;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif     
-#ifdef demoOnePair
-    set<card> tmp;
-    card c ; 
-    c.first = (short)RANK::KING; c.second = (short)SUIT::HEARTS;
-    tmp.insert(c);
-    c.first = (short)RANK::QUEEN; c.second = (short)SUIT::CLUBS;
-    tmp.insert(c);
-    c.first = (short)RANK::TWO; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::SPADES;
-    tmp.insert(c);
-    c.first = (short)RANK::NINE; c.second = (short)SUIT::DIAMONS;
-    tmp.insert(c);
-    tmp.swap(cards);     
-    tmp.clear();
-#endif   
+    return true;
 }
 
 
