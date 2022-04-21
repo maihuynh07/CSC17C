@@ -41,7 +41,7 @@ void Poker::getInput(){
         
         // display message to players :"Do you want to play a new game (y/n)?";
         displayMessage(questions[question]); 
-        getline(cin,rep);
+        getline(cin >> ws,rep);
         // save answer of players
         transform(rep.begin(), rep.end(), rep.begin(), ::toupper);
         player.setReply(replies[rep]);
@@ -59,7 +59,7 @@ void Poker::getInput(){
             
             // if ask player "Do you want to change any card (y/n):"
             if(question == static_cast<short>(QUESTION::CHANGECARD)){
-                getline(cin,rep);
+                getline(cin >> ws,rep);
                 // save answer of players
                 transform(rep.begin(), rep.end(), rep.begin(), ::toupper);
                 player.setReply(replies[rep]);
@@ -77,7 +77,7 @@ void Poker::getInput(){
             // if player type number of card will be discarded
             if(question == static_cast<short>(QUESTION::NUMBEROFCARD)){
                 // using stringstream to convert rep(string) to numberOfCard(int)
-                getline(cin,rep);
+                getline(cin >> ws,rep);
                 stringstream number(rep);
                 number >> numberOfCard; 
             }
@@ -99,10 +99,8 @@ void Poker::getInput(){
                         player.setDiscardedPoss(number);
                         
                         // save cards are drawn into deck.disCardCards
-                        deck.disCardedCards.push(deck.cards.back());
+                        deck.drawCard();
                         
-                        // remove cards are drawn from deck
-                        deck.cards.pop_back();
                         count++;
                     }
                 }
@@ -112,6 +110,9 @@ void Poker::getInput(){
                 
                 // go to next state
                 state = static_cast<short>(GAME_STATE::DRAW);
+                
+                
+                
             }
             
             // set question to next question
@@ -121,17 +122,15 @@ void Poker::getInput(){
     }
     if(state == static_cast<short>(GAME_STATE::REPLAY)){
         string rep;
-        cin.clear();
         displayMessage(questions[question]); 
-        getline(cin,rep);
+        getline(cin >> ws,rep);
         // save answer of players
         transform(rep.begin(), rep.end(), rep.begin(), ::toupper);
         player.setReply(replies[rep]);
         
         if(player.getReply() == static_cast<short>(ANSWER::YES)){
-            status = static_cast<short>(GAME_STATUS::START);
-            question = static_cast<short>(QUESTION::START);
-            state = static_cast<short>(GAME_STATE::START);
+            resetGame();
+            return;
         }
         else{
             status = static_cast<short>(GAME_STATUS::END);
@@ -168,6 +167,7 @@ void Poker::update(){
     }
     if(state == static_cast<short>(GAME_STATE::SHOW)){
         state = static_cast<short>(GAME_STATE::REPLAY);
+        
         return;
     }
     
@@ -186,7 +186,8 @@ void Poker::dealCard(){
     short keyPlayer = 0;// key for cards of player
     short keyDealer = 0;// key for cards of player
     short dealedCard = 0;// number of cards is dealed
-    for(;itDeckCards!=deck.cards.end() && dealedCard<=SIZE_HAND+SIZE_HAND;++itDeckCards,++dealedCard){
+    
+    for(;itDeckCards!=deck.cards.end() && dealedCard<SIZE_HAND+SIZE_HAND;++itDeckCards,++dealedCard){
         if(dealedCard%2==0) {
             dealer.addCards(keyDealer++,deck.cards.back());
         }
@@ -195,6 +196,8 @@ void Poker::dealCard(){
         }
         deck.cards.pop_back();
     }
+    deck.status = static_cast<short>(DECK_STATUS::DEALED);
+    deck.size -= dealedCard;
 #endif    
     
 }
@@ -204,8 +207,6 @@ void Poker::rankHand(){
     player.rank();
     dealer.rank();
     
-    showCards(player.getRankedCards(),"Player Ranked Cards: ");
-    showCards(dealer.getRankedCards(),"Dealer Ranked Cards: ");
 #endif
 }
 void Poker::drawCard(){
@@ -235,6 +236,10 @@ void Poker::render(){
         displayMessage(messages[static_cast<short>(MESSAGE::END)]);
         exit(0);
     }
+    
+    showCards(player.getCards(),"Player Cards: ");
+    showCards(dealer.getCards(),"Dealer Cards: ");
+    showCards(deck.cards,string("Cards on deck:"));
 }
 void Poker::score(){
     set<card> cp = player.getCards();
@@ -623,16 +628,13 @@ void Poker::AIComputer(){
     while(count< sizeHighCard){
 
         // if high card too low, process drawing card.
-        if(ithc->first < LOWCARD){
+        if(ithc->first < LOWCARD || dealer.getHandRank() == static_cast<short>(HAND_RANKS::HIGHCARD)){
 
             // step 2: save to discardedPos
             dealer.setDiscardedPoss(posHighCard+1);   
 
             // step 3: save cards are drawn into deck.disCardCards
-            deck.disCardedCards.push(deck.cards.back());
-
-            // step 4: remove cards are drawn from deck
-            deck.cards.pop_back();
+            deck.drawCard();
 
             // set flag
             flag = true;
@@ -650,6 +652,35 @@ void Poker::AIComputer(){
 
         // arrange cards on suit
         dealer.sortBySuit();
+        
+        
     }
 }
-
+void Poker::resetGame(){
+    
+    status = static_cast<short>(GAME_STATUS::START);
+    question = static_cast<short>(QUESTION::START);
+    state = static_cast<short>(GAME_STATE::START);
+    
+    set<card> mergeCards ;
+    set<card> discardedCardsD = dealer.getDiscardedCards();
+    set<card> discardedCardsP = player.getDiscardedCards();
+    
+    set<card> cardsD = dealer.getCards();
+    set<card> cardsP = player.getCards();
+    
+    mergeCards.insert(discardedCardsD.begin(),discardedCardsD.end());
+    mergeCards.insert(discardedCardsP.begin(),discardedCardsP.end());
+    mergeCards.insert(cardsD.begin(),cardsD.end());
+    mergeCards.insert(cardsP.begin(),cardsP.end());
+    
+    deck.resetDeck(mergeCards);
+    player.reset();
+    dealer.reset();
+    
+    mergeCards.clear();
+    discardedCardsD.clear();
+    discardedCardsP.clear();
+    cardsD.clear();
+    cardsP.clear();
+}

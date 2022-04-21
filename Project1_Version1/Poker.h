@@ -17,7 +17,7 @@
 #include "Deck.h"
 
 
-class Poker {
+class Poker{
 #ifdef oneplayer
     PokerHand player;
     PokerHand dealer;
@@ -64,6 +64,8 @@ public:
      * @name: AIComputer(): play role as dealer, process drawing card or not, do after player draw card.
      * *************************************************************************/
     void AIComputer();
+    
+    void resetGame();
 private:
 
 };

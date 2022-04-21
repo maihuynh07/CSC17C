@@ -4,17 +4,18 @@
 #include <deque>
 #include <queue>
 #include <iostream>
+#include <set>
 using namespace std;
 class Deck {
-private:
-    
+public:
     short status;
     short size;
-public:
     deque<card> cards;
     queue<card> disCardedCards; 
+public:
     Deck();
-    // display cards on deck
+    card drawCard();
+    void resetDeck(set<card>&);
 };
 
 #endif /* DECK_H */

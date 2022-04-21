@@ -122,7 +122,6 @@ bool PokerHand::isFullHouse(){
     sizeHighCard = 0;
     return true;
 }
-
 bool PokerHand::isFlush(){
         
     auto position1= rankedCards.begin();
@@ -264,11 +263,11 @@ bool PokerHand::isPair(){
         
         if(itBegin->first == it1->first)  
            startRank = 0;
-        else if(itBegin->first == it1->first)  
+        else if(it1->first == it2->first)  
            startRank = 1;
-        else if(itBegin->first == it1->first)  
+        else if(it2->first == it3->first)  
            startRank = 2;
-        else if(itBegin->first == it1->first)  
+        else if(it3->first == it4->first)  
            startRank = 3;
         
         handRank = static_cast<short>(HAND_RANKS::ONEPAIR);
@@ -334,5 +333,15 @@ bool PokerHand::rank(){
     handRank = static_cast<short>(HAND_RANKS::HIGHCARD);
     return true;
 }
-
+void PokerHand::reset(){
+    cards.clear();
+    rankedCards.clear();
+    discardedCards.clear();
+    while(!discardedPoss.empty()) discardedPoss.pop();
+    score = 0;
+    reply = -1;
+    handRank = 0;
+    startRank = -1;
+    sizeHighCard = 0;
+}
 
