@@ -6,7 +6,7 @@
 #include "Helper.h"
 #include <map>
 #include <set>
-#include <queue>
+#include <stack>
 #include <list>
 using namespace std;
 class PokerHand {
@@ -14,7 +14,7 @@ private:
     set<card> cards; // set save cards of a poker hand in ASC order by rank (rank = pair.first)
     set<card,comp> rankedCards; // stack save cards ranked by suit (suit = pair.second)
     set<card> discardedCards; // set save cards which is discarded of a poker hand after draw round
-    queue<short> discardedPoss; // positions(in cards set) whose card is discarded , values in = {1,2,3,4,5}
+    stack<short> discardedPoss; // positions(in cards set) whose card is discarded , values in = {1,2,3,4,5}
     short score;
     short reply;
     short handRank; // save rank of player, isStraight, isFlush,...
@@ -36,11 +36,11 @@ public:
     
     /* *************************************************************************
      * @name: changeCards: add cards from deck.discardedCards and remove cards from cards at positions in discardedPoss.
-     * @parameter: queue<card>& : deck.discardedCards
+     * @parameter: stack<card>& : deck.discardedCards
        @return: true if successful
               , otherwise false
      **************************************************************************/
-    bool changeCards(queue<card>&);
+    bool changeCards(stack<card>&);
     
     /* *************************************************************************
      * @name: setDiscardedPoss: save position of card will be discard into discardedPoss.
@@ -146,6 +146,10 @@ public:
     
     void setSizeHighCard(short r){ sizeHighCard = r;}
     short getSizeHighCard()const{return sizeHighCard;}
+    
+    set<card> getDiscardedCards()const{return discardedCards;}
+    
+    void reset();
 };
 
 #endif /* POKERHAND_H */

@@ -20,7 +20,7 @@ Deck::Deck(){
     showCards(cards,string("Cards on deck:"));
     //Helper<unordered_map<short,pairs>>::showCards(cards,string("Cards on deck:"));
 }
-card Deck::drawCard(){
+void Deck::drawCard(){
     
     card dc = cards.back();
     
@@ -33,10 +33,9 @@ card Deck::drawCard(){
     // set size of deck
     size--;
     
-    return dc;
 }
-void Deck::resetDeck(set<card>& discardedCards){
-    cards.insert(cards.end(),discardedCards.begin(),discardedCards.end());
+void Deck::resetDeck(set<card>& ds){
+    cards.insert(cards.end(),ds.begin(),ds.end());
     size = SIZE_DECK;
     status = static_cast<short>(DECK_STATUS::FULL);
 }

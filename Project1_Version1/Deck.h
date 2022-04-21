@@ -2,7 +2,7 @@
 #define DECK_H
 #include "Helper.h"
 #include <deque>
-#include <queue>
+#include <stack>
 #include <iostream>
 #include <set>
 using namespace std;
@@ -11,10 +11,10 @@ public:
     short status;
     short size;
     deque<card> cards;
-    queue<card> disCardedCards; 
+    stack<card> disCardedCards; 
 public:
     Deck();
-    card drawCard();
+    void drawCard();
     void resetDeck(set<card>&);
 };
 

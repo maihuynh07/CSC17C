@@ -1,21 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   Poker.h
- * Author: Mai Huynh
- *
- * Created on April 14, 2022, 7:37 PM
- */
 #define oneplayer
 #ifndef POKER_H
 #define POKER_H
 #include "PokerHand.h"
 #include "Deck.h"
-
 
 class Poker{
 #ifdef oneplayer

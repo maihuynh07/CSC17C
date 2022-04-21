@@ -3,10 +3,9 @@
 
 #include "Poker.h"
 #include <algorithm>
-#include <cstdlib> //srand()
-#include <sstream>
-#include <stack> // using stringstream to convert string to int
-#include <map>
+#include <cstdlib> // srand()
+#include <sstream> // using stringstream to convert string to int
+
 void Poker::initializeGame(){
     
     // initialize status of game
@@ -69,8 +68,8 @@ void Poker::getInput(){
                     
                     // go to next state
                     state = static_cast<short>(GAME_STATE::DRAW);
-                    question +=3;
-                    break;
+                    question = static_cast<short>(QUESTION::REPLAY);
+                    return;
                 }
             }
             
@@ -95,7 +94,7 @@ void Poker::getInput(){
                     }
                     else{
                         
-                        // save to discardedPos
+                        // save positions to discardedPos
                         player.setDiscardedPoss(number);
                         
                         // save cards are drawn into deck.disCardCards
@@ -105,14 +104,8 @@ void Poker::getInput(){
                     }
                 }
                 
-                cin.ignore();
-                cin.clear();
-                
                 // go to next state
                 state = static_cast<short>(GAME_STATE::DRAW);
-                
-                
-                
             }
             
             // set question to next question
@@ -130,13 +123,10 @@ void Poker::getInput(){
         
         if(player.getReply() == static_cast<short>(ANSWER::YES)){
             resetGame();
-            return;
         }
         else{
             status = static_cast<short>(GAME_STATUS::END);
         }
-        // set question to next question
-        ++question; 
     }
 #endif
     
@@ -151,9 +141,11 @@ void Poker::update(){
             state = static_cast<short>(GAME_STATE::DEAL);
             status = static_cast<short>(GAME_STATUS::PLAYING);
             
-            dealCard();
-            rankHand();
         }
+    }
+    if(state == static_cast<short>(GAME_STATE::DEAL)){
+        dealCard();
+        rankHand();
     }
     if(state == static_cast<short>(GAME_STATE::DRAW)){
         drawCard();
@@ -167,7 +159,6 @@ void Poker::update(){
     }
     if(state == static_cast<short>(GAME_STATE::SHOW)){
         state = static_cast<short>(GAME_STATE::REPLAY);
-        
         return;
     }
     
@@ -636,6 +627,7 @@ void Poker::AIComputer(){
             // step 3: save cards are drawn into deck.disCardCards
             deck.drawCard();
 
+            
             // set flag
             flag = true;
         }
@@ -646,21 +638,21 @@ void Poker::AIComputer(){
     }
 
     if(flag){
-
         // step 5: change card
         dealer.changeCards(deck.disCardedCards);
 
         // arrange cards on suit
         dealer.sortBySuit();
-        
-        
     }
 }
 void Poker::resetGame(){
     
-    status = static_cast<short>(GAME_STATUS::START);
-    question = static_cast<short>(QUESTION::START);
-    state = static_cast<short>(GAME_STATE::START);
+    status = static_cast<short>(GAME_STATUS::PLAYING);
+    
+    // set skip step start at replay time
+    question = static_cast<short>(QUESTION::START)+1;
+    //player.setReply(static_cast<short>(ANSWER::YES));
+    state = static_cast<short>(GAME_STATE::DEAL);
     
     set<card> mergeCards ;
     set<card> discardedCardsD = dealer.getDiscardedCards();

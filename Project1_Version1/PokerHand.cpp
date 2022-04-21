@@ -19,15 +19,15 @@ bool PokerHand::setDiscardedPoss(short pos){
     discardedPoss.push(pos);
     return true;
 }
-bool PokerHand::changeCards(queue<card>& ds){
+bool PokerHand::changeCards(stack<card>& ds){
     
     set<card>::iterator it = cards.begin();
     
-    short count=0; // number of cards is removed in cards set
     // removed some cards from cards set and save to discardedCards
     while(!discardedPoss.empty()){
         
-        short pos = discardedPoss.front()-1 - count; 
+        short pos = discardedPoss.top()-1; 
+        if(pos<0) continue;
         it = next(cards.begin(),pos); 
         discardedPoss.pop();
         
@@ -39,12 +39,11 @@ bool PokerHand::changeCards(queue<card>& ds){
         
         // remove card at pos in cards
         cards.erase(it);
-        count ++;
     }
     
     // add ds to set of cards
     while(!ds.empty()){
-        cards.insert(ds.front());     
+        cards.insert(ds.top());     
         ds.pop();
     }
     return true;
