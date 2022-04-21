@@ -661,10 +661,8 @@ void Poker::resetGame(){
     set<card> cardsD = dealer.getCards();
     set<card> cardsP = player.getCards();
     
-    mergeCards.insert(discardedCardsD.begin(),discardedCardsD.end());
-    mergeCards.insert(discardedCardsP.begin(),discardedCardsP.end());
-    mergeCards.insert(cardsD.begin(),cardsD.end());
-    mergeCards.insert(cardsP.begin(),cardsP.end());
+    merge(discardedCardsD.begin(),discardedCardsD.end(),discardedCardsP.begin(),discardedCardsP.end(),inserter(mergeCards,mergeCards.end()));
+    merge(cardsD.begin(),cardsD.end(),cardsP.begin(),cardsP.end(),inserter(mergeCards,mergeCards.end()));
     
     deck.resetDeck(mergeCards);
     player.reset();
