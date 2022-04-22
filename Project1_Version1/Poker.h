@@ -3,8 +3,9 @@
 #define POKER_H
 #include "PokerHand.h"
 #include "Deck.h"
+#include "Helper.h"
 
-class Poker{
+class Poker: public Helper{
 #ifdef oneplayer
     PokerHand player;
     PokerHand dealer;
@@ -20,7 +21,7 @@ class Poker{
     map<string, short> replies; // answer of players
 public:
     void initializeGame(); // initialize a game
-    void getInput(); // ask user for some commands (ex: "Do you want to continue(y/n)?"
+    void getInput(); // get input from users
     void update(); 
     void render();
     short getStatus() const{return status;}; // get status of game
@@ -30,6 +31,7 @@ public:
     void dealCard(); // deal five cards per 1 player
     void drawCard(); // exchange some cards on players and deck
     void rankHand(); // rank players to score
+    
     /*  ************************************************************************
      *  @name: score: manipulate score of players in a game.
      *  Hands are ranked as follows (from high to low):
@@ -43,16 +45,14 @@ public:
         •	Pair
         •	High Card
      * *************************************************************************/
-     
     void score(); 
-    
     
     /****************************************************************************
      * @name: AIComputer(): play role as dealer, process drawing card or not, do after player draw card.
      * *************************************************************************/
     void AIComputer();
     
-    void resetGame();
+    void resetGame(); // reset game after user choose replay
 private:
 
 };

@@ -143,20 +143,24 @@ void Poker::update(){
             
         }
     }
+    
     if(state == static_cast<short>(GAME_STATE::DEAL)){
         dealCard();
         rankHand();
     }
+    
     if(state == static_cast<short>(GAME_STATE::DRAW)){
         drawCard();
         rankHand();
         state = static_cast<short>(GAME_STATE::SCORE);
     }
+    
     if(state == static_cast<short>(GAME_STATE::SCORE)){
         score();
         state = static_cast<short>(GAME_STATE::SHOW);
         return;
     }
+    
     if(state == static_cast<short>(GAME_STATE::SHOW)){
         state = static_cast<short>(GAME_STATE::REPLAY);
         return;
@@ -164,7 +168,6 @@ void Poker::update(){
     
 #endif
 }
-
 void Poker::dealCard(){
     
     //step1: shuffle 52 cards on deck
@@ -175,7 +178,7 @@ void Poker::dealCard(){
 #ifdef oneplayer
     deque<card>::iterator itDeckCards = deck.cards.begin();
     short keyPlayer = 0;// key for cards of player
-    short keyDealer = 0;// key for cards of player
+    short keyDealer = 0;// key for cards of dealer
     short dealedCard = 0;// number of cards is dealed
     
     for(;itDeckCards!=deck.cards.end() && dealedCard<SIZE_HAND+SIZE_HAND;++itDeckCards,++dealedCard){
@@ -187,6 +190,7 @@ void Poker::dealCard(){
         }
         deck.cards.pop_back();
     }
+    
     deck.status = static_cast<short>(DECK_STATUS::DEALED);
     deck.size -= dealedCard;
 #endif    
@@ -210,7 +214,6 @@ void Poker::drawCard(){
     AIComputer();
     
 }
-
 void Poker::render(){
     if(state == static_cast<short>(GAME_STATE::SHOW)){
         if(dealer.getScore() < player.getScore()){
@@ -230,7 +233,7 @@ void Poker::render(){
     
     showCards(player.getCards(),"Player Cards: ");
     showCards(dealer.getCards(),"Dealer Cards: ");
-    showCards(deck.cards,string("Cards on deck:"));
+    deck.showDeck();
 }
 void Poker::score(){
     set<card> cp = player.getCards();
@@ -284,8 +287,8 @@ void Poker::score(){
             else {
                 
                 // remove four of kind from set of cards to get high card
-                cd.erase(itd,next(itd,TWOPAIR));
-                cp.erase(itp,next(itp,TWOPAIR)); 
+                cd.erase(itd,next(itd,FOUROFKIND));
+                cp.erase(itp,next(itp,FOUROFKIND)); 
                 
                 itd = cd.begin();
                 itp = cp.begin();
@@ -396,7 +399,6 @@ void Poker::score(){
         
         // type: xxx y z,  x yyy z, x y zzz
         if(dealer.getHandRank() == static_cast<short>(HAND_RANKS::THREEOFKIND)){
-            
             
             short posHighCardP = player.getStartRank();
             short posHighCardD = dealer.getStartRank();
@@ -618,7 +620,7 @@ void Poker::AIComputer(){
     // step 2: test which high cards need to decide drawing or not
     while(count< sizeHighCard){
 
-        // if high card too low, process drawing card.
+        // if high card too low or lowest hand rank, process drawing card.
         if(ithc->first < LOWCARD || dealer.getHandRank() == static_cast<short>(HAND_RANKS::HIGHCARD)){
 
             // step 2: save to discardedPos
@@ -627,7 +629,6 @@ void Poker::AIComputer(){
             // step 3: save cards are drawn into deck.disCardCards
             deck.drawCard();
 
-            
             // set flag
             flag = true;
         }
@@ -651,9 +652,9 @@ void Poker::resetGame(){
     
     // set skip step start at replay time
     question = static_cast<short>(QUESTION::START)+1;
-    //player.setReply(static_cast<short>(ANSWER::YES));
     state = static_cast<short>(GAME_STATE::DEAL);
     
+    // refill deck.cards
     set<card> mergeCards ;
     set<card> discardedCardsD = dealer.getDiscardedCards();
     set<card> discardedCardsP = player.getDiscardedCards();
@@ -664,6 +665,7 @@ void Poker::resetGame(){
     merge(discardedCardsD.begin(),discardedCardsD.end(),discardedCardsP.begin(),discardedCardsP.end(),inserter(mergeCards,mergeCards.end()));
     merge(cardsD.begin(),cardsD.end(),cardsP.begin(),cardsP.end(),inserter(mergeCards,mergeCards.end()));
     
+    // reset game
     deck.resetDeck(mergeCards);
     player.reset();
     dealer.reset();

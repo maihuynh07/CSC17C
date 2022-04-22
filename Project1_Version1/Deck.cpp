@@ -2,9 +2,13 @@
 
 #include "Deck.h"
 Deck::Deck(){
+    
     // set size of deck is 52 cards
     size = SIZE_DECK; 
+    
     // set status of deck is full at the beginning of a game
+    status = static_cast<short>(DECK_STATUS::FULL);
+    
     short key = 0;
     // create 52 cards of poker game
     for(short rank = (short)RANK::ACE;rank!=(short)RANK::KING+1;++rank){
@@ -16,9 +20,9 @@ Deck::Deck(){
             cards.push_back(newCard);
         }
     }
+    
     // print all card on deck
-    showCards(cards,string("Cards on deck:"));
-    //Helper<unordered_map<short,pairs>>::showCards(cards,string("Cards on deck:"));
+    showDeck();
 }
 void Deck::drawCard(){
     
@@ -39,5 +43,17 @@ void Deck::resetDeck(set<card>& ds){
     size = SIZE_DECK;
     status = static_cast<short>(DECK_STATUS::FULL);
 }
+void Deck::showDeck(){ // print cards
+    cout << endl<<"********"<<"Deck cards:"<<"***********";
+    cout << endl;
+    cout << "\tRANK\tSUIT";
+    cout << endl;
+    int count = 0;
+    for(auto card = cards.begin();card!= cards.end();++card){
+        cout<<++count<<"."<<"\t"<<sRank(card->first)<<"\t"<<sSuit(card->second)<<endl;
+    }
+    cout<<endl;
+}   
+
 
 

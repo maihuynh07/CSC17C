@@ -6,7 +6,8 @@
 #include <iostream>
 #include <set>
 using namespace std;
-class Deck {
+
+class Deck : public Helper{
 public:
     short status;
     short size;
@@ -14,8 +15,9 @@ public:
     stack<card> disCardedCards; 
 public:
     Deck();
-    void drawCard();
-    void resetDeck(set<card>&);
+    void drawCard(); // draw card from deck, save to discardedCards
+    void resetDeck(set<card>&); // reset deck (deck is full size)
+    void showDeck(); // display deck card
 };
 
 #endif /* DECK_H */
